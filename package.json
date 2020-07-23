@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "format": "prettier './**/*.ts' --write"
+  },
   "dependencies": {
     "@types/cheerio": "^0.22.21",
     "@types/glob": "^7.1.3",
@@ -12,6 +15,11 @@
     "typescript": "^3.9.7"
   },
   "devDependencies": {
-    "prettier": "^2.0.5"
+    "@types/jest": "^26.0.5",
+    "@types/node": "^14.0.24",
+    "jest": "^26.1.0",
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.1.3",
+    "vue": "^2.6.11"
   }
 }
