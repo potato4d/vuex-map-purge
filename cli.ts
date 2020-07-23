@@ -12,16 +12,12 @@ const cli = meow(`
     $ vuex-map-purge '<path>'
 `)
 
-async function run(
-  input: meow.Result<meow.AnyFlags>['input'],
-  flags: meow.Result<meow.AnyFlags>['flags']
-) {
+async function run(input: meow.Result<meow.AnyFlags>['input']) {
   await Promise.all(
     input.map(async (f) => {
       const files = await glob(f)
       await Promise.all([
         files.map(async (path) => {
-          console.log(path)
           const sfc = await fs.readFile(path, { encoding: 'utf8' })
           const $ = cheerio.load(sfc)
           const src = $('script')!.html()
@@ -38,10 +34,11 @@ async function run(
               encoding: 'utf8',
             }
           )
+          console.log(path)
         }),
       ])
     })
   )
 }
 
-run(cli.input, cli.flags)
+run(cli.input)
