@@ -4,7 +4,7 @@ import { getVuexArguments } from './utils/vuex-extraction'
 const CATCH_KEYWORD = 'computed'
 const UTIL_KEYWORD = 'mapGetters'
 
-function isMethod(node: ts.Node): boolean {
+function isComputed(node: ts.Node): boolean {
   if (!ts.isPropertyAssignment(node)) {
     return false
   }
@@ -30,7 +30,7 @@ export const purgeMapGetters = <T extends ts.Node>(
     if (!ts.isPropertyAssignment(node)) {
       return node
     }
-    if (!isMethod(node)) {
+    if (!isComputed(node)) {
       return node
     }
     const propAssignment: ts.PropertyAssignment = node
@@ -40,73 +40,70 @@ export const purgeMapGetters = <T extends ts.Node>(
     const initializer: ts.ObjectLiteralExpression = propAssignment.initializer
 
     initializer.properties = ts.createNodeArray<ts.ObjectLiteralElementLike>(
-      initializer.properties.reduce(
-        (
-          before: ts.NodeArray<ts.ObjectLiteralElementLike>,
-          current: ts.ObjectLiteralElementLike
-        ): any => {
-          const fallback = ts.createNodeArray([...before, current])
-          // mapGetters always used with spread operator
-          if (!ts.isSpreadAssignment(current)) {
-            return fallback
-          }
+      initializer.properties.reduce((before, current) => {
+        const fallback = ts.createNodeArray<ts.ObjectLiteralElementLike>([
+          ...before,
+          current,
+        ])
+        // mapGetters always used with spread operator
+        if (!ts.isSpreadAssignment(current)) {
+          return fallback
+        }
 
-          if (!ts.isCallExpression(current.expression)) {
-            return fallback
-          }
+        if (!ts.isCallExpression(current.expression)) {
+          return fallback
+        }
 
-          const maybeMapGetters: ts.CallExpression = current.expression
-          if (!ts.isIdentifier(maybeMapGetters.expression)) {
-            return fallback
-          }
+        const maybeMapGetters: ts.CallExpression = current.expression
+        if (!ts.isIdentifier(maybeMapGetters.expression)) {
+          return fallback
+        }
 
-          const maybeMapGettersCallName: ts.Identifier =
-            maybeMapGetters.expression
-          if (maybeMapGettersCallName.escapedText !== UTIL_KEYWORD) {
-            return fallback
-          }
+        const maybeMapGettersCallName: ts.Identifier =
+          maybeMapGetters.expression
+        if (maybeMapGettersCallName.escapedText !== UTIL_KEYWORD) {
+          return fallback
+        }
 
-          const mapGetters = maybeMapGetters
-          let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
-          let prefix: string
+        const mapGetters = maybeMapGetters
+        let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
+        let prefix: string
 
-          try {
-            const r = getVuexArguments(mapGetters.arguments)
-            prefix = r[0] ? `${r[0]}/` : ''
-            list = r[1]
-          } catch (e) {
-            return fallback
-          }
+        try {
+          const r = getVuexArguments(mapGetters.arguments)
+          prefix = r[0] ? `${r[0]}/` : ''
+          list = r[1]
+        } catch (e) {
+          return fallback
+        }
 
-          return [
-            ...before,
-            ...list.map((arg: any) => {
-              return ts.createMethod(
-                undefined,
-                undefined,
-                undefined,
-                ts.createIdentifier(arg.text),
-                undefined,
-                undefined,
-                [],
-                undefined,
-                ts.createBlock([
-                  ts.createReturn(
-                    ts.createElementAccess(
-                      ts.createPropertyAccess(
-                        ts.createPropertyAccess(ts.createThis(), '$store'),
-                        'getters'
-                      ),
-                      ts.createStringLiteral(`${prefix}${arg.text}`)
-                    )
-                  ),
-                ])
-              )
-            }),
-          ]
-        },
-        ts.createNodeArray()
-      )
+        return ts.createNodeArray<ts.ObjectLiteralElementLike>([
+          ...before,
+          ...list.map((arg: any) => {
+            return ts.createMethod(
+              undefined,
+              undefined,
+              undefined,
+              ts.createIdentifier(arg.text),
+              undefined,
+              undefined,
+              [],
+              undefined,
+              ts.createBlock([
+                ts.createReturn(
+                  ts.createElementAccess(
+                    ts.createPropertyAccess(
+                      ts.createPropertyAccess(ts.createThis(), '$store'),
+                      'getters'
+                    ),
+                    ts.createStringLiteral(`${prefix}${arg.text}`)
+                  )
+                ),
+              ])
+            )
+          }),
+        ])
+      }, ts.createNodeArray<ts.ObjectLiteralElementLike>())
     )
 
     return node

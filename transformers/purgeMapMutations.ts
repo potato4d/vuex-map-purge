@@ -4,7 +4,7 @@ import { getVuexArguments } from './utils/vuex-extraction'
 const CATCH_KEYWORD = 'methods'
 const UTIL_KEYWORD = 'mapMutations'
 
-function isMethod(node: ts.Node): boolean {
+function isMethods(node: ts.Node): boolean {
   if (!ts.isPropertyAssignment(node)) {
     return false
   }
@@ -30,7 +30,7 @@ export const purgeMapMutations = <T extends ts.Node>(
     if (!ts.isPropertyAssignment(node)) {
       return node
     }
-    if (!isMethod(node)) {
+    if (!isMethods(node)) {
       return node
     }
     const propAssignment: ts.PropertyAssignment = node
@@ -40,77 +40,74 @@ export const purgeMapMutations = <T extends ts.Node>(
     const initializer: ts.ObjectLiteralExpression = propAssignment.initializer
 
     initializer.properties = ts.createNodeArray<ts.ObjectLiteralElementLike>(
-      initializer.properties.reduce(
-        (
-          before: ts.NodeArray<ts.ObjectLiteralElementLike>,
-          current: ts.ObjectLiteralElementLike
-        ): any => {
-          const fallback = [...before, current]
-          // mapMutations always used with spread operator
-          if (!ts.isSpreadAssignment(current)) {
-            return fallback
-          }
+      initializer.properties.reduce((before, current) => {
+        const fallback = ts.createNodeArray<ts.ObjectLiteralElementLike>([
+          ...before,
+          current,
+        ])
+        // mapMutations always used with spread operator
+        if (!ts.isSpreadAssignment(current)) {
+          return fallback
+        }
 
-          if (!ts.isCallExpression(current.expression)) {
-            return fallback
-          }
+        if (!ts.isCallExpression(current.expression)) {
+          return fallback
+        }
 
-          const maybeMapMutations: ts.CallExpression = current.expression
-          if (!ts.isIdentifier(maybeMapMutations.expression)) {
-            return fallback
-          }
+        const maybeMapMutations: ts.CallExpression = current.expression
+        if (!ts.isIdentifier(maybeMapMutations.expression)) {
+          return fallback
+        }
 
-          const maybeMapMutationsCallName: ts.Identifier =
-            maybeMapMutations.expression
-          if (maybeMapMutationsCallName.escapedText !== UTIL_KEYWORD) {
-            return fallback
-          }
+        const maybeMapMutationsCallName: ts.Identifier =
+          maybeMapMutations.expression
+        if (maybeMapMutationsCallName.escapedText !== UTIL_KEYWORD) {
+          return fallback
+        }
 
-          const mapMutations = maybeMapMutations
-          let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
-          let prefix: string
+        const mapMutations = maybeMapMutations
+        let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
+        let prefix: string
 
-          try {
-            const r = getVuexArguments(mapMutations.arguments)
-            prefix = r[0] ? `${r[0]}/` : ''
-            list = r[1]
-          } catch (e) {
-            return fallback
-          }
+        try {
+          const r = getVuexArguments(mapMutations.arguments)
+          prefix = r[0] ? `${r[0]}/` : ''
+          list = r[1]
+        } catch (e) {
+          return fallback
+        }
 
-          return [
-            ...before,
-            ...list.map((arg: any) => {
-              return ts.createMethod(
-                undefined,
-                undefined,
-                undefined,
-                ts.createIdentifier(arg.text),
-                undefined,
-                undefined,
-                [ts.createParameter([], [], undefined, 'payload')],
-                undefined,
-                ts.createBlock([
-                  ts.createReturn(
-                    ts.createCall(
-                      ts.createPropertyAccess(
-                        ts.createPropertyAccess(ts.createThis(), '$store'),
-                        'commit'
-                      ),
-                      undefined,
-                      [
-                        ts.createStringLiteral(`${prefix}${arg.text}`),
-                        ts.createIdentifier('payload'),
-                      ]
-                    )
-                  ),
-                ])
-              )
-            }),
-          ]
-        },
-        ts.createNodeArray()
-      )
+        return ts.createNodeArray<ts.ObjectLiteralElementLike>([
+          ...before,
+          ...list.map((arg: any) => {
+            return ts.createMethod(
+              undefined,
+              undefined,
+              undefined,
+              ts.createIdentifier(arg.text),
+              undefined,
+              undefined,
+              [ts.createParameter([], [], undefined, 'payload')],
+              undefined,
+              ts.createBlock([
+                ts.createReturn(
+                  ts.createCall(
+                    ts.createPropertyAccess(
+                      ts.createPropertyAccess(ts.createThis(), '$store'),
+                      'commit'
+                    ),
+                    undefined,
+                    [
+                      ts.createStringLiteral(`${prefix}${arg.text}`),
+                      ts.createIdentifier('payload'),
+                    ]
+                  )
+                ),
+              ])
+            )
+          }),
+        ])
+      }, ts.createNodeArray<ts.ObjectLiteralElementLike>())
     )
 
     return node
