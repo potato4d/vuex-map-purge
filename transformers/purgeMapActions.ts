@@ -79,7 +79,10 @@ export const purgeMapActions = <T extends ts.Node>(
 
         return ts.createNodeArray([
           ...before,
-          ...list.map((arg: any) => {
+          ...list.map((arg) => {
+            if (!ts.isStringLiteral(arg)) {
+              throw new Error('Unexpected argument')
+            }
             return ts.createMethod(
               undefined,
               undefined,
