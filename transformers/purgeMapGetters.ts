@@ -51,7 +51,7 @@ export const purgeMapGetters = <T extends ts.Node>(
                             ts.createPropertyAccess(ts.createThis(), '$store'),
                             'getters'
                           ),
-                          ts.createIdentifier(`${prefix}${arg.text}`)
+                          ts.createStringLiteral(`${prefix}${arg.text}`)
                         )
                       ),
                     ])
