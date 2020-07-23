@@ -38,90 +38,92 @@ export const purgeMapActions = <T extends ts.Node>(
     }
     const initializer: ts.ObjectLiteralExpression = propAssignment.initializer
 
-    initializer.properties = initializer.properties.reduce(
-      (
-        before: ts.NodeArray<ts.ObjectLiteralElement>,
-        current: ts.ObjectLiteralElement
-      ): any => {
-        const fallback = [...before, current]
-        // mapActions always used with spread operator
-        if (!ts.isSpreadAssignment(current)) {
-          return fallback
-        }
-
-        if (!ts.isCallExpression(current.expression)) {
-          return fallback
-        }
-
-        const maybeMapActions: ts.CallExpression = current.expression
-        if (!ts.isIdentifier(maybeMapActions.expression)) {
-          return fallback
-        }
-
-        const maybeMapActionsCallName: ts.Identifier =
-          maybeMapActions.expression
-        if (maybeMapActionsCallName.escapedText !== UTIL_KEYWORD) {
-          return fallback
-        }
-
-        const mapActions = maybeMapActions
-        const [namespaceOrList, listOrNull] = mapActions.arguments
-
-        let prefix: string
-        let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
-
-        if (ts.isStringLiteral(namespaceOrList)) {
-          // namespaced mapping
-          const ns: ts.StringLiteral = namespaceOrList
-          if (!ts.isArrayLiteralExpression(listOrNull)) {
+    initializer.properties = ts.createNodeArray<ts.ObjectLiteralElementLike>(
+      initializer.properties.reduce(
+        (
+          before: ts.NodeArray<ts.ObjectLiteralElementLike>,
+          current: ts.ObjectLiteralElementLike
+        ) => {
+          const fallback = ts.createNodeArray([...before, current])
+          // mapActions always used with spread operator
+          if (!ts.isSpreadAssignment(current)) {
             return fallback
           }
-          const l: ts.ArrayLiteralExpression = listOrNull
-          prefix = `${ns.text}/`
-          list = l.elements
-        } else {
-          // root mapping
-          if (!ts.isArrayLiteralExpression(namespaceOrList)) {
+
+          if (!ts.isCallExpression(current.expression)) {
             return fallback
           }
-          const l: ts.ArrayLiteralExpression = namespaceOrList
-          prefix = ''
-          list = l.elements
-        }
 
-        return [
-          ...before,
-          ...list.map((arg: any) => {
-            return ts.createMethod(
-              undefined,
-              undefined,
-              undefined,
-              ts.createIdentifier(arg.text),
-              undefined,
-              undefined,
-              [ts.createParameter([], [], undefined, 'payload')],
-              undefined,
-              ts.createBlock([
-                ts.createReturn(
-                  ts.createCall(
-                    ts.createPropertyAccess(
-                      ts.createPropertyAccess(ts.createThis(), '$store'),
-                      'dispatch'
-                    ),
-                    undefined,
-                    [
-                      ts.createStringLiteral(`${prefix}${arg.text}`),
-                      ts.createIdentifier('payload'),
-                    ]
-                  )
-                ),
-              ])
-            )
-          }),
-        ]
-      },
-      ts.createNodeArray()
-    ) as any
+          const maybeMapActions: ts.CallExpression = current.expression
+          if (!ts.isIdentifier(maybeMapActions.expression)) {
+            return fallback
+          }
+
+          const maybeMapActionsCallName: ts.Identifier =
+            maybeMapActions.expression
+          if (maybeMapActionsCallName.escapedText !== UTIL_KEYWORD) {
+            return fallback
+          }
+
+          const mapActions = maybeMapActions
+          const [namespaceOrList, listOrNull] = mapActions.arguments
+
+          let prefix: string
+          let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
+
+          if (ts.isStringLiteral(namespaceOrList)) {
+            // namespaced mapping
+            const ns: ts.StringLiteral = namespaceOrList
+            if (!ts.isArrayLiteralExpression(listOrNull)) {
+              return fallback
+            }
+            const l: ts.ArrayLiteralExpression = listOrNull
+            prefix = `${ns.text}/`
+            list = l.elements
+          } else {
+            // root mapping
+            if (!ts.isArrayLiteralExpression(namespaceOrList)) {
+              return fallback
+            }
+            const l: ts.ArrayLiteralExpression = namespaceOrList
+            prefix = ''
+            list = l.elements
+          }
+
+          return ts.createNodeArray([
+            ...before,
+            ...list.map((arg: any) => {
+              return ts.createMethod(
+                undefined,
+                undefined,
+                undefined,
+                ts.createIdentifier(arg.text),
+                undefined,
+                undefined,
+                [ts.createParameter([], [], undefined, 'payload')],
+                undefined,
+                ts.createBlock([
+                  ts.createReturn(
+                    ts.createCall(
+                      ts.createPropertyAccess(
+                        ts.createPropertyAccess(ts.createThis(), '$store'),
+                        'dispatch'
+                      ),
+                      undefined,
+                      [
+                        ts.createStringLiteral(`${prefix}${arg.text}`),
+                        ts.createIdentifier('payload'),
+                      ]
+                    )
+                  ),
+                ])
+              )
+            }),
+          ])
+        },
+        ts.createNodeArray<ts.ObjectLiteralElementLike>()
+      )
+    )
 
     return node
   }
