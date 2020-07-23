@@ -49,5 +49,29 @@ export default Vue.extend({
 `.replace(/\n/, '')
       expect(Core.purge(source)).toBe(output)
     })
+
+    test('mapActions', () => {
+      const source = `
+import Vue from 'vue'
+
+export default Vue.extend({
+  methods: {
+    ...mapActions(['loginUser']),
+    ...mapActions('ui', ['switchToEditorView'])
+  }
+})
+`.replace(/\n/, '')
+
+      const output = `
+import Vue from "vue";
+export default Vue.extend({
+    methods: {
+        loginUser(payload) { return this.$store.dispatch("loginUser", payload); },
+        switchToEditorView(payload) { return this.$store.dispatch("ui/switchToEditorView", payload); }
+    }
+});
+`.replace(/\n/, '')
+      expect(Core.purge(source)).toBe(output)
+    })
   })
 })
