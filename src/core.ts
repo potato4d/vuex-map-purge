@@ -1,7 +1,7 @@
 import * as ts from 'typescript'
-import { purgeMapGetters } from './transformers/purgeMapGetters'
-import { purgeMapMutations } from './transformers/purgeMapMutations'
-import { purgeMapActions } from './transformers/purgeMapActions'
+import { purgeMapGetters } from '../transformers/purgeMapGetters'
+import { purgeMapMutations } from '../transformers/purgeMapMutations'
+import { purgeMapActions } from '../transformers/purgeMapActions'
 
 export function purge(source: string): string {
   const sourceFile = ts.createSourceFile(

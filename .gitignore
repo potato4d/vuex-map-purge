@@ -1,0 +1,4 @@
+cli.js
+src/**/*.js
+spec/**/*.js
+transformers/**/*.js
