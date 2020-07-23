@@ -1,4 +1,5 @@
 import * as ts from 'typescript'
+import { getVuexArguments } from './utils/vuex-extraction'
 
 const CATCH_KEYWORD = 'methods'
 const UTIL_KEYWORD = 'mapActions'
@@ -66,28 +67,15 @@ export const purgeMapActions = <T extends ts.Node>(
           }
 
           const mapActions = maybeMapActions
-          const [namespaceOrList, listOrNull] = mapActions.arguments
-
-          let prefix: string
           let list: ts.NodeArray<ts.Expression> = ts.createNodeArray()
+          let prefix: string
 
-          if (ts.isStringLiteral(namespaceOrList)) {
-            // namespaced mapping
-            const ns: ts.StringLiteral = namespaceOrList
-            if (!ts.isArrayLiteralExpression(listOrNull)) {
-              return fallback
-            }
-            const l: ts.ArrayLiteralExpression = listOrNull
-            prefix = `${ns.text}/`
-            list = l.elements
-          } else {
-            // root mapping
-            if (!ts.isArrayLiteralExpression(namespaceOrList)) {
-              return fallback
-            }
-            const l: ts.ArrayLiteralExpression = namespaceOrList
-            prefix = ''
-            list = l.elements
+          try {
+            const r = getVuexArguments(mapActions.arguments)
+            prefix = r[0] ? `${r[0]}/` : ''
+            list = r[1]
+          } catch (e) {
+            return fallback
           }
 
           return ts.createNodeArray([
