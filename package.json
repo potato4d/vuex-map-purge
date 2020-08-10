@@ -9,7 +9,7 @@
     "format": "prettier './**/*.ts' --write"
   },
   "bin": {
-    "vuex-map-purge": "./cli.js"
+    "vuex-map-purge": "./dist/cli.js"
   },
   "dependencies": {
     "@types/cheerio": "^0.22.21",
