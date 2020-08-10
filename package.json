@@ -29,5 +29,12 @@
     "standard-version": "^8.0.2",
     "ts-jest": "^26.1.3",
     "vue": "^2.6.11"
-  }
+  },
+  "keywords": [
+    "vue",
+    "vue.js",
+    "vuex",
+    "migration",
+    "cli"
+  ]
 }
