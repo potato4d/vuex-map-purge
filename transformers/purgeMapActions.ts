@@ -1,5 +1,6 @@
 import * as ts from 'typescript'
 import { getVuexArguments } from './utils/vuex-extraction'
+import * as defineFunction from './utils/defineFunction'
 
 const CATCH_KEYWORD = 'methods'
 const UTIL_KEYWORD = 'mapActions'
@@ -24,7 +25,16 @@ function isMethods(node: ts.Node): boolean {
 export const purgeMapActions = <T extends ts.Node>(
   context: ts.TransformationContext
 ) => (rootNode: T) => {
+  let isCheckedMode: boolean = false
+  let isJavaScriptMode: boolean = false
+
   function visit(node: ts.Node): ts.Node {
+    if (!isCheckedMode) {
+      isCheckedMode = true
+      isJavaScriptMode =
+        node.getFullText().indexOf('// [vuex-map-purge]: js') === 0
+    }
+
     node = ts.visitEachChild(node, visit, context)
 
     if (!ts.isPropertyAssignment(node)) {
@@ -90,8 +100,8 @@ export const purgeMapActions = <T extends ts.Node>(
               ts.createIdentifier(arg.text),
               undefined,
               undefined,
-              [ts.createParameter([], [], undefined, 'payload')],
-              undefined,
+              defineFunction.getPayloadParameter(!isJavaScriptMode),
+              defineFunction.getReturnType(!isJavaScriptMode),
               ts.createBlock([
                 ts.createReturn(
                   ts.createCall(

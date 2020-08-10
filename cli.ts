@@ -24,12 +24,19 @@ async function run(input: meow.Result<meow.AnyFlags>['input']) {
           if (!src) {
             return
           }
-          const output = Core.purge(src)
           const regexp = new RegExp('<script( lang="ts")?>((.*)\\n)*</script>')
+          const isJavaScriptSource = !!sfc.match(regexp)![1]
+          const meta = `// [vuex-map-purge]: ${
+            isJavaScriptSource ? 'js' : 'ts'
+          }`
+          const output = Core.purge(meta + '\n' + src)
           // TODO: ソース内に `<script></script>` の文字があると破滅するので対処する
           await fs.writeFile(
             path,
-            sfc.replace(regexp, `<script$1>\n${output}</script>`),
+            sfc.replace(
+              regexp,
+              `<script$1>\n${output.replace(meta + '\n', '')}</script>`
+            ),
             {
               encoding: 'utf8',
             }
