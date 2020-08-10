@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/potato4d/vuex-map-purge/compare/v0.1.2...v0.1.3) (2020-08-10)
+
+
+### Bug Fixes
+
+* No type annotation in JavaScript code ([3633f4d](https://github.com/potato4d/vuex-map-purge/commit/3633f4dde82bcb334bcf7ef5d70c3439964d526f))
+
 ### [0.1.2](https://github.com/potato4d/vuex-map-purge/compare/v0.1.1...v0.1.2) (2020-08-10)
 
 ### [0.1.1](https://github.com/potato4d/vuex-map-purge/compare/v0.1.0...v0.1.1) (2020-08-10)
