@@ -3,3 +3,4 @@ src/**/*.js
 spec/**/*.js
 transformers/**/*.js
 dist/
+node_modules

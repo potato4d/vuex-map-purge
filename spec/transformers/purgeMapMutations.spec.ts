@@ -18,8 +18,8 @@ export default Vue.extend({
 import Vue from "vue";
 export default Vue.extend({
     methods: {
-        loginUser(payload?: unknown): unknown { return this.$store.commit("loginUser", payload); },
-        switchToEditorView(payload?: unknown): unknown { return this.$store.commit("ui/switchToEditorView", payload); }
+        loginUser(payload?: unknown): unknown { this.$store.commit("loginUser", payload); },
+        switchToEditorView(payload?: unknown): unknown { this.$store.commit("ui/switchToEditorView", payload); }
     }
 });
 `.replace(/\n/, '')
@@ -44,8 +44,8 @@ export default Vue.extend({
 import Vue from "vue";
 export default Vue.extend({
     methods: {
-        loginUser(payload) { return this.$store.commit("loginUser", payload); },
-        switchToEditorView(payload) { return this.$store.commit("ui/switchToEditorView", payload); }
+        loginUser(payload) { this.$store.commit("loginUser", payload); },
+        switchToEditorView(payload) { this.$store.commit("ui/switchToEditorView", payload); }
     }
 });
 `.replace(/\n/, '')
