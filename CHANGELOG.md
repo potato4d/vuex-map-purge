@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/potato4d/vuex-map-purge/compare/v0.1.3...v0.2.0) (2020-10-07)
+
+
+### Bug Fixes
+
+* Remove return statement because mutation does not return Promise ([#4](https://github.com/potato4d/vuex-map-purge/issues/4)) ([8671c6a](https://github.com/potato4d/vuex-map-purge/commit/8671c6a651751260295534834aa0b64488304555))
+
 ### [0.1.3](https://github.com/potato4d/vuex-map-purge/compare/v0.1.2...v0.1.3) (2020-08-10)
 
 
