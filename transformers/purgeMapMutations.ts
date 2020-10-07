@@ -104,7 +104,7 @@ export const purgeMapMutations = <T extends ts.Node>(
               defineFunction.getPayloadParameter(!isJavaScriptMode),
               defineFunction.getReturnType(!isJavaScriptMode),
               ts.createBlock([
-                ts.createReturn(
+                ts.createStatement(
                   ts.createCall(
                     ts.createPropertyAccess(
                       ts.createPropertyAccess(ts.createThis(), '$store'),
