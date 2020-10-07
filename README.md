@@ -15,7 +15,7 @@ As a result, we needed a tool to eliminate mapXXX from existing Vue.js projects 
 Install via Yarn / NPM.
 
 ```shell
-$ yarn add -g vuex-map-purge # or npm install -g vuex-map-purge
+$ yarn global add vuex-map-purge # or npm install -g vuex-map-purge
 ```
 
 ## Usage
